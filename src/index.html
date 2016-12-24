@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			.container {
+				border: 1px solid #000;
+				margin: 5px;
+			}
+			
+			.container img {
+				width: 50px;
+				margin: 5px;
+				position: relative;
+			}
+		</style>
+		
+		<script src="http://localhost:9999/socket.io/socket.io.js"></script>
+		<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+		<script>
+			var socket = io.connect('http://localhost:9999');
+			socket.on("palavra", function(data){
+				console.log(data);
+				if (data.id != socket.socket.sessionid) {
+					$("#otro").css({
+						"left": data.percento
+					});
+				}
+			});
+			
+			$(function(){
+				var text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor nisl in vulputate dignissim. Pellentesque non tincidunt nisl, in pretium augue. Mauris sapien lacus, aliquam quis ipsum vel, condimentum sagittis odio.";
+				var strlen = text.length;
+				var umporcento = strlen / 100;
+				text = text.split(" ");
+				var corrido = 0;
+				var current = 0;
+				var total = text.length;
+				$("#typetext").on("keyup", function(e){
+					if ($(this).val() == text[current].substring(0, $(this).val().length)) {
+						$(this).css({
+							"border": "1px solid #00CC00"
+						});
+					} else {
+						$(this).css({
+							"border": "1px solid #CC0000"
+						});
+					}
+					
+					if (e.keyCode == 32) {
+						if ($(this).val() == text[current]+" ") {
+							$(this).val("");
+							corrido += text[current].length+1;
+							$("#me").css({
+								"left": (corrido / umporcento).toString()+"%"
+							});
+							current++;
+							socket.emit('escrevi', { percento: (corrido / umporcento).toString()+"%" });
+						}						
+						return false;
+					}
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur tempor nisl in vulputate dignissim. Pellentesque non tincidunt nisl, in pretium augue. Mauris sapien lacus, aliquam quis ipsum vel, condimentum sagittis odio.</p>
+		<div class="container"><img id="me" src="car1.png" /></div>
+		<div class="container"><img id="otro" src="car2.png" /></div>
+		<textarea id="typetext" style="margin: 20px;width: 1042px; height: 32px"></textarea>
+	</body>
+</html>
